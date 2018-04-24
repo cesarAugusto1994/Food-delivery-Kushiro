@@ -1,12 +1,14 @@
 import React from 'react';
 import {
+  Picker,
   StyleSheet,
   View,
   Text,
   Button,
   TouchableHighlight,
   FlatList,
-  Animated
+  Animated,
+  TouchableOpacity
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 import MapView, { Marker } from 'react-native-maps';
@@ -15,7 +17,11 @@ import markers from './constants/restaurants.json';
 
 const PANEL_HEIGHT = 250;
 
-class HomeScreen extends React.Component {
+class MapScreen extends React.Component {
+  static navigationOptions = {
+    title: 'Map'
+  }
+
   constructor(props) {
     super(props);
 
@@ -30,23 +36,15 @@ class HomeScreen extends React.Component {
     Animated.spring(
       this.state.bounceValue,
       {
-        toValue
+        toValue,
+        speed: 8,
+        bounciness: 8
       }
     ).start();
 
     this.setState({
       isPanelHidden,
       restaurant: marker ? marker : ''
-    });
-  }
-
-  _showMenu(menu) {
-    return menu.forEach(item => {
-      return (
-        <Text>
-          {item.name}
-        </Text>
-      );
     });
   }
 
@@ -72,6 +70,12 @@ class HomeScreen extends React.Component {
             renderItem={({item}) => <Text>{`${item.name}: ${item.price}￥`}</Text>}
             keyExtractor={this._keyExtractor}
           />
+          <TouchableOpacity
+             style={styles.button}
+             onPress={() => this.props.navigation.navigate('OrderDetail', restaurant)}
+           >
+             <Text>Start Ordering</Text>
+           </TouchableOpacity>
         </Animated.View>
       )
     }
@@ -83,7 +87,6 @@ class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Home Screen</Text>
         <MapView
           style={styles.map}
           initialRegion={{
@@ -100,49 +103,80 @@ class HomeScreen extends React.Component {
               description={marker.location.formattedAddress.join(' ')}
               key={marker.name}
               onSelect={e => this._toggleSubview(0, false, marker)}
-              onDeselect={e => {this._toggleSubview(PANEL_HEIGHT, true)}}
+              onDeselect={e => this._toggleSubview(PANEL_HEIGHT, true)}
             />
           ))}
         </MapView>
         {this._showRestaurantInfo(this.state.restaurant)}
-        {/* <Button
-          title="Go to Details"
-          onPress={() => this.props.navigation.navigate('Details')}
-        /> */}
       </View>
     );
   }
 }
 
-class DetailsScreen extends React.Component {
+class OrderDetailScreen extends React.Component {
+  static navigationOptions = {
+    title: 'Order'
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      selectedItem: this.props.navigation.state.params.menu[0]
+    }
+  }
+
   render() {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text>Details Screen</Text>
-        <Button
-          title="Go to Details... again"
-          onPress={() => this.props.navigation.navigate('Details')}
-        />
-        <Button
-          title="Go back"
-          onPress={() => this.props.navigation.goBack()}
-        />
-      </View>
-    );
+    const { params } = this.props.navigation.state;
+
+    if (params) {
+      const { name, location: { formattedAddress }, menu } = params;
+
+      const listItem = menu.map(item => {
+        return <Picker.Item key={item.name} value={item.name} label={item.name} />
+      });
+
+      return (
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <Text>{`Order to: ${name}`}</Text>
+          <Text>{`Address: ${formattedAddress.join(' ')}`}</Text>
+          <Picker
+            selectedValue={this.state.selectedItem}
+            style={{ flex: 1, height: 20, width: 100 }}
+            onValueChange={(itemValue, itemIndex) => this.setState({selectedItem: itemValue})}
+            mode="dropdown"
+          >
+            {listItem}
+          </Picker>
+          <TouchableOpacity
+           style={styles.button}
+           onPress={() => {}}
+          >
+             <Text>Add item</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    } else {
+      return (
+        <View>
+          <Text>{params}</Text>
+        </View>
+      )
+    }
   }
 }
 
 const RootStack = StackNavigator(
   {
-    Home: {
-      screen: HomeScreen,
+    Map: {
+      screen: MapScreen,
     },
-    Details: {
-      screen: DetailsScreen,
+    OrderDetail: {
+      screen: OrderDetailScreen,
     },
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: 'Map',
   }
 );
 
@@ -162,6 +196,12 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "#FFFFFF",
     height: PANEL_HEIGHT
+  },
+  button: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#DDDDDD',
+    padding: 10
   }
 });
 
