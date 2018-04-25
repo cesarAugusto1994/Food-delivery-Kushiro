@@ -14,6 +14,7 @@ import { StackNavigator } from 'react-navigation';
 import MapView, { Marker } from 'react-native-maps';
 
 import markers from './constants/restaurants.json';
+import OrderDetailScreen from './screens/OrderDetailScreen';
 
 const PANEL_HEIGHT = 250;
 
@@ -113,58 +114,58 @@ class MapScreen extends React.Component {
   }
 }
 
-class OrderDetailScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Order'
-  }
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      selectedItem: this.props.navigation.state.params.menu[0]
-    }
-  }
-
-  render() {
-    const { params } = this.props.navigation.state;
-
-    if (params) {
-      const { name, location: { formattedAddress }, menu } = params;
-
-      const listItem = menu.map(item => {
-        return <Picker.Item key={item.name} value={item.name} label={item.name} />
-      });
-
-      return (
-        <View style={{ flex: 1, alignItems: 'center' }}>
-          <Text>{`Order to: ${name}`}</Text>
-          <Text>{`Address: ${formattedAddress.join(' ')}`}</Text>
-          <Picker
-            selectedValue={this.state.selectedItem}
-            style={{ flex: 1, height: 20, width: 100 }}
-            onValueChange={(itemValue, itemIndex) => this.setState({selectedItem: itemValue})}
-            mode="dropdown"
-          >
-            {listItem}
-          </Picker>
-          <TouchableOpacity
-           style={styles.button}
-           onPress={() => {}}
-          >
-             <Text>Add item</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    } else {
-      return (
-        <View>
-          <Text>{params}</Text>
-        </View>
-      )
-    }
-  }
-}
+// class OrderDetailScreen extends React.Component {
+//   static navigationOptions = {
+//     title: 'Order'
+//   }
+//
+//   constructor(props) {
+//     super(props);
+//
+//     this.state = {
+//       selectedItem: this.props.navigation.state.params.menu[0]
+//     }
+//   }
+//
+//   render() {
+//     const { params } = this.props.navigation.state;
+//
+//     if (params) {
+//       const { name, location: { formattedAddress }, menu } = params;
+//
+//       const listItem = menu.map(item => {
+//         return <Picker.Item key={item.name} value={item.name} label={item.name} />
+//       });
+//
+//       return (
+//         <View style={{ flex: 1, alignItems: 'center' }}>
+//           <Text>{`Order to: ${name}`}</Text>
+//           <Text>{`Address: ${formattedAddress.join(' ')}`}</Text>
+//           <Picker
+//             selectedValue={this.state.selectedItem}
+//             style={{ flex: 1, height: 20, width: 100 }}
+//             onValueChange={(itemValue, itemIndex) => this.setState({selectedItem: itemValue})}
+//             mode="dropdown"
+//           >
+//             {listItem}
+//           </Picker>
+//           <TouchableOpacity
+//            style={styles.button}
+//            onPress={() => {}}
+//           >
+//              <Text>Add item</Text>
+//           </TouchableOpacity>
+//         </View>
+//       );
+//     } else {
+//       return (
+//         <View>
+//           <Text>{params}</Text>
+//         </View>
+//       )
+//     }
+//   }
+// }
 
 const RootStack = StackNavigator(
   {
