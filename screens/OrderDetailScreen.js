@@ -5,7 +5,8 @@ import {
   Picker,
   TouchableOpacity,
   Button,
-  StyleSheet
+  StyleSheet,
+  Alert
 } from 'react-native';
 import { Constants } from 'expo';
 
@@ -22,11 +23,46 @@ export default class OrderDetailScreen extends React.Component {
     this.state = {
       selectedItem: this.props.navigation.state.params.menu[0].name,
       qty: QUANTITY_LIST[0],
-      listItem: []
+      listItem: [],
+      menu: this.props.navigation.state.params.menu,
+      total: 0
     }
   }
 
+  _calcTotal = () => {
+    // 2 arrays of objects
+    // the first array contains only obj with properties: name, price
+    // the other array contains only obj with properties: name, qty
+    // => merge 2 arrays into one that contains objs with properties: name, price, qty
+
+    const menu = this.props.navigation.state.params.menu;
+
+    if (this.state.listItem.length === 0) {
+      return 0;
+    }
+
+    const newList = this.state.listItem.map(item => {
+      let result;
+
+      menu.forEach(el => {
+        if (el.name === item.name) {
+          result = Object.assign(el, item);
+        }
+      });
+
+      return result;
+    });
+
+    return newList.reduce((acc, item) => {
+      return acc + (item.price * item.qty);
+    }, 0);
+  }
+
   _updateList = () => {
+    if (this.state.listItem.length === 4) {
+      return Alert.alert('Not available', 'You can not order more than 4');
+    }
+
     const { selectedItem: name, qty } = this.state;
 
     this.setState({
@@ -80,6 +116,7 @@ export default class OrderDetailScreen extends React.Component {
              <Text>Add item</Text>
           </TouchableOpacity>
           {this._renderList()}
+          <Text style={styles.paragraph}>{`Total cost: ${this._calcTotal()}￥`}</Text>
         </View>
       );
     } else {
