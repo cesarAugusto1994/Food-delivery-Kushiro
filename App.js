@@ -13,6 +13,7 @@ import {
 import { StackNavigator } from 'react-navigation';
 import MapView, { Marker } from 'react-native-maps';
 
+// refactor: it should be better if we call Foursquare APIs ourselves and create a different random menu for each restaurant everytime user log to the app
 import markers from './constants/restaurants.json';
 import OrderDetailScreen from './screens/OrderDetailScreen';
 

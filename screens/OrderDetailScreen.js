@@ -9,6 +9,7 @@ import {
   Alert
 } from 'react-native';
 import { Constants } from 'expo';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const QUANTITY_LIST = [1,2,3,4];
 
@@ -23,9 +24,7 @@ export default class OrderDetailScreen extends React.Component {
     this.state = {
       selectedItem: this.props.navigation.state.params.menu[0].name,
       qty: QUANTITY_LIST[0],
-      listItem: [],
-      menu: this.props.navigation.state.params.menu,
-      total: 0
+      listItem: []
     }
   }
 
@@ -59,8 +58,9 @@ export default class OrderDetailScreen extends React.Component {
   }
 
   _updateList = () => {
+    // refactor: optimal the order list by adding 'id' property
     if (this.state.listItem.length === 4) {
-      return Alert.alert('Not available', 'You can not order more than 4');
+      return Alert.alert('Not available', 'You can not order more than 4 items.');
     }
 
     const { selectedItem: name, qty } = this.state;
@@ -70,10 +70,34 @@ export default class OrderDetailScreen extends React.Component {
     });
   }
 
+  _removeItem = (item) => {
+    // refactor: _removeItem doesn't behave correctly when there are 2 item with the same name
+    this.setState({
+      listItem: this.state.listItem.filter(i => i.name !== item.name)
+    });
+  }
+
   _renderList = () => {
     return this.state.listItem.map((item, index) => {
-      return <Text style={styles.items} key={index}>{`${item.name} * ${item.qty}`}</Text>
+      return <Text style={styles.items} key={index}>{`${item.name} * ${item.qty}`} <Icon name='remove' size={24} color="#900" onPress={() => this._removeItem(item)} /></Text>
     });
+  }
+
+  _navigateToPayment = () => {
+    if (this.state.listItem.length === 0) {
+      return Alert.alert('Not available', 'U sure don\'t want to order anything??');
+    } else {
+      return Alert.alert(
+        'Confirm',
+        'Are you sure?',
+        [
+          {text: 'Yes', onPress: () => Alert.alert('Next', 'Going to Payment Screen')},
+          {text: 'No', onPress: () => false}
+        ]
+      )
+    }
+
+    return false;
   }
 
   render() {
@@ -82,8 +106,9 @@ export default class OrderDetailScreen extends React.Component {
     if (params) {
       const { name, location: { formattedAddress }, menu } = params;
 
-      const listItem = menu.map(item => {
-        return <Picker.Item key={item.name} value={item.name} label={item.name} />
+      // refactor: use a function _renderPickers() to combine 2 sets of pickers here
+      const listItem = menu.map((item, index) => {
+        return <Picker.Item key={index} value={item.name} label={item.name} />
       });
 
       const listQuantity = QUANTITY_LIST.map((num, index) => {
@@ -117,6 +142,12 @@ export default class OrderDetailScreen extends React.Component {
           </TouchableOpacity>
           {this._renderList()}
           <Text style={styles.paragraph}>{`Total cost: ${this._calcTotal()}￥`}</Text>
+          <TouchableOpacity
+            style={styles.buttonToPayment}
+            onPress={() => this._navigateToPayment()}
+          >
+            <Text>Proceed to Payment</Text>
+          </TouchableOpacity>
         </View>
       );
     } else {
@@ -149,13 +180,19 @@ const styles = StyleSheet.create({
   },
   items: {
     margin: 12,
-    fontSize: 12,
+    fontSize: 15,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#34495e',
   },
   button: {
     alignItems: 'center',
+    backgroundColor: '#DDDDDD',
+    padding: 10
+  },
+  buttonToPayment: {
+    position: 'absolute',
+    bottom: 10,
     backgroundColor: '#DDDDDD',
     padding: 10
   }
