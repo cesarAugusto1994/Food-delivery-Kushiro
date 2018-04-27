@@ -79,6 +79,7 @@ export default class OrderDetailScreen extends React.Component {
 
   _renderList = () => {
     return this.state.listItem.map((item, index) => {
+      // refactor: seperate RemoveIcon component
       return <Text style={styles.items} key={index}>{`${item.name} * ${item.qty}`} <Icon name='remove' size={24} color="#900" onPress={() => this._removeItem(item)} /></Text>
     });
   }
