@@ -101,7 +101,7 @@ export default class MapScreen extends React.Component {
               description={marker.location.formattedAddress.join(' ')}
               key={marker.name}
               // image={require('../assets/restaurant.png')}
-              onSelect={e => this._toggleSubview(0, false, marker)}
+              onSelect={e => this._toggleSubview(0.01, false, marker)}
               onDeselect={e => this._toggleSubview(PANEL_HEIGHT, true)}
             />
           ))}
