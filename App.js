@@ -24,6 +24,10 @@ const RootStack = createBottomTabNavigator({
     Map: MapScreen,
     OrderDetail: OrderDetailScreen
   })
+},{
+  navigationOptions: {
+    tabBarVisible: false
+  }
 });
 
 export default class App extends React.Component {
