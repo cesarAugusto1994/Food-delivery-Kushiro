@@ -4,9 +4,9 @@ import { View, Text } from 'react-native';
 import Slide from '../components/Slide';
 
 const SLIDE_DATA = [
-  { text: 'First slide', color: '#03A9F4' },
-  { text: 'Second slide', color: '#009688' },
-  { text: 'Third slide', color: '#03A9F4' }
+  { text: 'Welcome to the app', color: '#03A9F4' },
+  { text: 'Deliver food to your home from your favorite store quickly and easily.', color: '#009688' },
+  { text: 'Let\'s get started', color: '#03A9F4' }
 ]
 
 export default class WelcomeScreen extends Component {
