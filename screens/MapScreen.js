@@ -9,9 +9,9 @@ import {
   TouchableOpacity
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import { Location, Permissions } from 'expo';
 
 import markers from '../constants/restaurants.json';
-
 
 const PANEL_HEIGHT = 250;
 
@@ -20,14 +20,47 @@ export default class MapScreen extends React.Component {
     title: 'Map'
   }
 
+  componentDidMount() {
+    this._getLocationAsync();
+  }
+
   constructor(props) {
     super(props);
 
     this.state = {
       bounceValue: new Animated.Value(PANEL_HEIGHT),
       isPanelHidden: true,
-      restaurant: ''
+      restaurant: '',
+      region: {
+        latitude: 42.975,
+        longitude: 144.37472,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      },
+      locationResult: null,
+      location: null,
+      hasLocationPermissions: false
     }
+  }
+
+  _getLocationAsync = async () => {
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+      this.setState({
+        locationResult: 'Permission to access location was denied'
+      });
+    } else {
+      this.setState({ hasLocationPermissions: true });
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+    this.setState({ location });
+
+    this.setState({ region: { latitude: location.coords.latitude, longitude: location.coords.longitude, longitudeDelta: 0.04, latitudeDelta: 0.09 }})
+  }
+
+  _onRegionChangeComplete = (region) => {
+    this.setState({ region });
   }
 
   _toggleSubview(toValue, isPanelHidden, marker) {
@@ -77,8 +110,18 @@ export default class MapScreen extends React.Component {
         </Animated.View>
       )
     }
-    else {
+  }
 
+  _renderPositionMarker() {
+    if (this.state.location) {
+      const { latitude, longitude } = this.state.location.coords;
+
+      return (
+        <Marker
+          coordinate={{ latitude, longitude }}
+          title='Your location'
+        />
+      )
     }
   }
 
@@ -87,12 +130,8 @@ export default class MapScreen extends React.Component {
       <View style={styles.container}>
         <MapView
           style={styles.map}
-          initialRegion={{
-            latitude: 42.975,
-            longitude: 144.37472,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
+          initialRegion={this.state.region}
+          onRegionChangeComplete={this._onRegionChangeComplete}
         >
           {markers.map(marker => (
             <Marker
@@ -105,6 +144,7 @@ export default class MapScreen extends React.Component {
               onDeselect={e => this._toggleSubview(PANEL_HEIGHT, true)}
             />
           ))}
+          {this._renderPositionMarker()}
         </MapView>
         {this._showRestaurantInfo(this.state.restaurant)}
       </View>
