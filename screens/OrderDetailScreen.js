@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -7,25 +7,26 @@ import {
   Button,
   StyleSheet,
   Alert
-} from 'react-native';
-import { Constants } from 'expo';
-import Icon from 'react-native-vector-icons/FontAwesome';
+} from "react-native";
+import { Constants } from "expo";
+import Icon from "react-native-vector-icons/FontAwesome";
+import RemoveIcon from "../components/RemoveIcon";
 
-const QUANTITY_LIST = [1,2,3,4];
+const QUANTITY_LIST = [1, 2, 3, 4];
 
 export default class OrderDetailScreen extends React.Component {
   static navigationOptions = {
-    title: 'Order'
-  }
+    title: "Order"
+  };
 
   constructor(props) {
     super(props);
 
     this.state = {
       selectedItem: this.props.navigation.state.params.menu[0].name,
-      qty: QUANTITY_LIST[0],
+      qty: 1,
       listItem: []
-    }
+    };
   }
 
   _calcTotal = () => {
@@ -53,53 +54,63 @@ export default class OrderDetailScreen extends React.Component {
     });
 
     return newList.reduce((acc, item) => {
-      return acc + (item.price * item.qty);
+      return acc + item.price * item.qty;
     }, 0);
-  }
+  };
 
   _updateList = () => {
-    // refactor: optimal the order list by adding 'id' property
     if (this.state.listItem.length === 4) {
-      return Alert.alert('Not available', 'You can not order more than 4 items.');
+      return Alert.alert(
+        "Not available",
+        "You can not order more than 4 items."
+      );
     }
+    // generate random ID between 1-1000 (both inclusive) for each item in the order list
+    const randomID = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
 
     const { selectedItem: name, qty } = this.state;
 
     this.setState({
-      listItem: [...this.state.listItem, { name, qty }]
+      listItem: [...this.state.listItem, { name, qty, id: randomID }]
     });
-  }
+  };
 
-  _removeItem = (item) => {
-    // refactor: _removeItem doesn't behave correctly when there are 2 item with the same name
+  _removeItem = item => {
     this.setState({
-      listItem: this.state.listItem.filter(i => i.name !== item.name)
+      listItem: this.state.listItem.filter(i => i.id !== item.id)
     });
-  }
+  };
 
   _renderList = () => {
     return this.state.listItem.map((item, index) => {
-      // refactor: seperate RemoveIcon component
-      return <Text style={styles.items} key={index}>{`${item.name} * ${item.qty}`} <Icon name='remove' size={24} color="#900" onPress={() => this._removeItem(item)} /></Text>
+      return (
+        <Text style={styles.items} key={index}>
+          {`${item.name} * ${item.qty}`}
+          {/* this seems overdo but mostly to practice using reusable component */}
+          <RemoveIcon size={24} onPress={() => this._removeItem(item)} />
+        </Text>
+      );
     });
-  }
+  };
 
   _navigateToPayment = () => {
     if (this.state.listItem.length === 0) {
-      return Alert.alert('Not available', 'U sure don\'t want to order anything??');
-    } else {
       return Alert.alert(
-        'Confirm',
-        'Are you sure?',
-        [
-          {text: 'Yes', onPress: () => Alert.alert('Next', 'Going to Payment Screen')},
-          {text: 'No', onPress: () => false}
-        ]
-      )
+        "Not available",
+        "U sure don't want to order anything??"
+      );
+    } else {
+      return Alert.alert("Confirm", "Are you sure?", [
+        {
+          text: "Yes",
+          onPress: () => Alert.alert("Next", "Going to Payment Screen")
+        },
+        { text: "No", onPress: () => false }
+      ]);
     }
 
     return false;
-  }
+  };
 
   render() {
     const { params } = this.props.navigation.state;
@@ -107,13 +118,12 @@ export default class OrderDetailScreen extends React.Component {
     if (params) {
       const { name, location: { formattedAddress }, menu } = params;
 
-      // refactor: use a function _renderPickers() to combine 2 sets of pickers here
       const listItem = menu.map((item, index) => {
-        return <Picker.Item key={index} value={item.name} label={item.name} />
+        return <Picker.Item key={index} value={item.name} label={item.name} />;
       });
 
       const listQuantity = QUANTITY_LIST.map((num, index) => {
-        return <Picker.Item key={index} value={num} label={num.toString()} />
+        return <Picker.Item key={index} value={num} label={num.toString()} />;
       });
 
       return (
@@ -130,19 +140,18 @@ export default class OrderDetailScreen extends React.Component {
             <Picker
               style={{ width: 80 }}
               selectedValue={this.state.qty}
-              onValueChange={(qty) => this.setState({ qty })}
+              onValueChange={qty => this.setState({ qty })}
             >
               {listQuantity}
             </Picker>
           </View>
-          <TouchableOpacity
-           style={styles.button}
-           onPress={this._updateList}
-          >
-             <Text>Add item</Text>
+          <TouchableOpacity style={styles.button} onPress={this._updateList}>
+            <Text>Add item</Text>
           </TouchableOpacity>
           {this._renderList()}
-          <Text style={styles.paragraph}>{`Total cost: ${this._calcTotal()}￥`}</Text>
+          <Text
+            style={styles.paragraph}
+          >{`Total cost: ${this._calcTotal()}￥`}</Text>
           <TouchableOpacity
             style={styles.buttonToPayment}
             onPress={() => this._navigateToPayment()}
@@ -156,7 +165,7 @@ export default class OrderDetailScreen extends React.Component {
         <View>
           <Text>Something wrong!!</Text>
         </View>
-      )
+      );
     }
   }
 }
@@ -164,37 +173,37 @@ export default class OrderDetailScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingTop: Constants.statusBarHeight,
-    backgroundColor: '#ecf0f1',
+    backgroundColor: "#ecf0f1"
   },
   paragraph: {
     margin: 12,
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#34495e',
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#34495e"
   },
   pickers: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
+    flexDirection: "row",
+    justifyContent: "space-between"
   },
   items: {
     margin: 12,
     fontSize: 15,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#34495e',
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#34495e"
   },
   button: {
-    alignItems: 'center',
-    backgroundColor: '#DDDDDD',
+    alignItems: "center",
+    backgroundColor: "#DDDDDD",
     padding: 10
   },
   buttonToPayment: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 10,
-    backgroundColor: '#DDDDDD',
+    backgroundColor: "#DDDDDD",
     padding: 10
   }
 });
