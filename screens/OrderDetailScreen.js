@@ -86,7 +86,7 @@ export default class OrderDetailScreen extends React.Component {
       return (
         <Text style={styles.items} key={index}>
           {`${item.name} * ${item.qty}`}
-          {/* this seems overdo but mostly to practice using reusable component */}
+          {/* this seems unnecessary but mostly to practice using reusable component */}
           <RemoveIcon size={24} onPress={() => this._removeItem(item)} />
         </Text>
       );
@@ -103,7 +103,7 @@ export default class OrderDetailScreen extends React.Component {
       return Alert.alert("Confirm", "Are you sure?", [
         {
           text: "Yes",
-          onPress: () => Alert.alert("Next", "Going to Payment Screen")
+          onPress: () => this.props.navigation.navigate("Checkout")
         },
         { text: "No", onPress: () => false }
       ]);

@@ -1,45 +1,56 @@
 import React from "react";
 import {
-  Picker,
-  StyleSheet,
-  View,
-  Text,
-  Button,
-  TouchableHighlight,
-  FlatList,
-  Animated,
-  TouchableOpacity
-} from "react-native";
-import {
   createBottomTabNavigator,
   createStackNavigator
 } from "react-navigation";
+import { View } from "react-native";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
 
-// refactor: it should be better if we call Foursquare APIs ourselves and create a different random menu for each restaurant everytime user log to the app
-// import markers from './constants/restaurants.json';
+// refactor: we should call Foursquare APIs ourselves and create a different random menu for each restaurant everytime user log to the app
 import MapScreen from "./screens/MapScreen";
 import OrderDetailScreen from "./screens/OrderDetailScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import CheckoutScreen from "./screens/CheckoutScreen";
+import AccountScreen from "./screens/AccountScreen";
+import reducers from "./reducers";
 
 const RootStack = createBottomTabNavigator(
   {
-    Checkout: CheckoutScreen,
     Welcome: WelcomeScreen,
-    Main: createStackNavigator({
-      Map: MapScreen,
-      OrderDetail: OrderDetailScreen
-    })
+    Main: createBottomTabNavigator(
+      {
+        Account: AccountScreen,
+        Order: createStackNavigator({
+          Map: MapScreen,
+          OrderDetail: OrderDetailScreen,
+          Checkout: CheckoutScreen
+        })
+      },
+      {
+        navigationOptions: {
+          tabBarVisible: true
+        }
+      }
+    )
   },
   {
     navigationOptions: {
-      // tabBarVisible: false
+      tabBarVisible: false
     }
   }
 );
 
+const store = createStore(reducers, {}, applyMiddleware());
+
 export default class App extends React.Component {
   render() {
-    return <RootStack />;
+    return (
+      <Provider store={store}>
+        <View style={{ flex: 1 }}>
+          <RootStack />
+        </View>
+      </Provider>
+    );
   }
 }

@@ -16,8 +16,8 @@ const information = {
 
 export default class App extends Component {
   state = {
-    token: {},
-    res: {}
+    token: {}
+    // res: {}
   };
 
   async componentDidMount() {
@@ -29,35 +29,26 @@ export default class App extends Component {
     var token = card.id;
     this.setState({ token });
 
-    try {
-      // const res = await axios.post(
-      //   "http://192.168.56.1:5000/api/stripe",
-      //   this.state.token,
-      //   {
-      //     headers: {
-      //       "Access-Control-Allow-Origin": "*"
-      //     }
-      //   }
-      // );
-      const res = await fetch("http://192.168.56.1:5000/api/stripe", {
-        method: "POST",
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json"
-        },
-        body: token
-      });
-      this.setState({ res });
-    } catch (e) {
-      this.setState({ res: e });
-    }
+    // try {
+    //   const res = await axios.post(
+    //     "http://192.168.56.1:5000/api/stripe",
+    //     this.state.token,
+    //     {
+    //       headers: {
+    //         "Access-Control-Allow-Origin": "*"
+    //       }
+    //     }
+    //   );
+    //   this.setState({ res });
+    // } catch (e) {
+    //   this.setState({ res: e });
+    // }
   }
 
   render() {
     return (
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.paragraph}>{JSON.stringify(this.state.res)}</Text>
+        <Text style={styles.paragraph}>{JSON.stringify(this.state.token)}</Text>
       </ScrollView>
     );
   }

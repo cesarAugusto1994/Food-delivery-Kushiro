@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Picker,
   StyleSheet,
@@ -7,18 +7,18 @@ import {
   FlatList,
   Animated,
   TouchableOpacity
-} from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import { Location, Permissions } from 'expo';
+} from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { Location, Permissions } from "expo";
 
-import markers from '../constants/restaurants.json';
+import markers from "../constants/restaurants.json";
 
 const PANEL_HEIGHT = 250;
 
 export default class MapScreen extends React.Component {
   static navigationOptions = {
-    title: 'Map'
-  }
+    title: "Map"
+  };
 
   componentDidMount() {
     this._getLocationAsync();
@@ -30,24 +30,25 @@ export default class MapScreen extends React.Component {
     this.state = {
       bounceValue: new Animated.Value(PANEL_HEIGHT),
       isPanelHidden: true,
-      restaurant: '',
+      restaurant: "",
+      // make constants REGION
       region: {
         latitude: 42.975,
         longitude: 144.37472,
         latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        longitudeDelta: 0.0421
       },
       locationResult: null,
       location: null,
       hasLocationPermissions: false
-    }
+    };
   }
 
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status !== 'granted') {
+    if (status !== "granted") {
       this.setState({
-        locationResult: 'Permission to access location was denied'
+        locationResult: "Permission to access location was denied"
       });
     } else {
       this.setState({ hasLocationPermissions: true });
@@ -56,33 +57,42 @@ export default class MapScreen extends React.Component {
     let location = await Location.getCurrentPositionAsync({});
     this.setState({ location });
 
-    this.setState({ region: { latitude: location.coords.latitude, longitude: location.coords.longitude, longitudeDelta: 0.04, latitudeDelta: 0.09 }})
-  }
+    this.setState({
+      region: {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        longitudeDelta: 0.04,
+        latitudeDelta: 0.09
+      }
+    });
+  };
 
-  _onRegionChangeComplete = (region) => {
+  _onRegionChangeComplete = region => {
     this.setState({ region });
-  }
+  };
 
   _toggleSubview(toValue, isPanelHidden, marker) {
-    Animated.spring(
-      this.state.bounceValue,
-      {
-        toValue,
-        speed: 8,
-        bounciness: 8
-      }
-    ).start();
+    Animated.spring(this.state.bounceValue, {
+      toValue,
+      speed: 8,
+      bounciness: 8
+    }).start();
 
     this.setState({
       isPanelHidden,
-      restaurant: marker ? marker : ''
+      restaurant: marker ? marker : ""
     });
   }
 
   _keyExtractor = (item, index) => item.name;
   _showRestaurantInfo(restaurant) {
     if (restaurant) {
-      const { name, contact: { formattedPhone }, location: { formattedAddress }, menu } = restaurant;
+      const {
+        name,
+        contact: { formattedPhone },
+        location: { formattedAddress },
+        menu
+      } = restaurant;
 
       return (
         <Animated.View
@@ -94,21 +104,25 @@ export default class MapScreen extends React.Component {
           ]}
         >
           <Text>{name}</Text>
-          <Text>{formattedAddress.join(' ')}</Text>
+          <Text>{formattedAddress.join(" ")}</Text>
           <Text>{formattedPhone}</Text>
           <FlatList
             data={menu}
-            renderItem={({item}) => <Text>{`${item.name}: ${item.price}￥`}</Text>}
+            renderItem={({ item }) => (
+              <Text>{`${item.name}: ${item.price}￥`}</Text>
+            )}
             keyExtractor={this._keyExtractor}
           />
           <TouchableOpacity
-             style={styles.button}
-             onPress={() => this.props.navigation.navigate('OrderDetail', restaurant)}
-           >
-             <Text>Start Ordering</Text>
-           </TouchableOpacity>
+            style={styles.button}
+            onPress={() =>
+              this.props.navigation.navigate("OrderDetail", restaurant)
+            }
+          >
+            <Text>Start Ordering</Text>
+          </TouchableOpacity>
         </Animated.View>
-      )
+      );
     }
   }
 
@@ -117,11 +131,8 @@ export default class MapScreen extends React.Component {
       const { latitude, longitude } = this.state.location.coords;
 
       return (
-        <Marker
-          coordinate={{ latitude, longitude }}
-          title='Your location'
-        />
-      )
+        <Marker coordinate={{ latitude, longitude }} title="Your location" />
+      );
     }
   }
 
@@ -135,9 +146,12 @@ export default class MapScreen extends React.Component {
         >
           {markers.map(marker => (
             <Marker
-              coordinate={{ latitude: marker.location.lat, longitude: marker.location.lng }}
+              coordinate={{
+                latitude: marker.location.lat,
+                longitude: marker.location.lng
+              }}
               title={marker.name}
-              description={marker.location.formattedAddress.join(' ')}
+              description={marker.location.formattedAddress.join(" ")}
               key={marker.name}
               // image={require('../assets/restaurant.png')}
               onSelect={e => this._toggleSubview(0.01, false, marker)}
@@ -155,11 +169,11 @@ export default class MapScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center"
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFillObject
   },
   subView: {
     position: "absolute",
@@ -171,8 +185,8 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#DDDDDD',
+    justifyContent: "center",
+    backgroundColor: "#DDDDDD",
     padding: 10
   }
 });
