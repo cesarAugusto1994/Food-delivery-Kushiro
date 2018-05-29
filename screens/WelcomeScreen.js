@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text } from "react-native";
+import { View, Text, AsyncStorage } from "react-native";
 
 import Slide from "../components/Slide";
 
@@ -14,7 +14,16 @@ const SLIDE_DATA = [
 ];
 
 export default class WelcomeScreen extends Component {
-  onSlidesComplete = () => {
+  async componentWillMount() {
+    const isFirstTime = await AsyncStorage.getItem("isFirstTime");
+
+    if (isFirstTime === "false") {
+      this.props.navigation.navigate("Main");
+    }
+  }
+
+  onSlidesComplete = async () => {
+    await AsyncStorage.setItem("isFirstTime", "false");
     this.props.navigation.navigate("Main");
   };
 

@@ -5,7 +5,6 @@ import {
 } from "react-navigation";
 import { View } from "react-native";
 import { Provider } from "react-redux";
-import { createStore, applyMiddleware } from "redux";
 
 // refactor: we should call Foursquare APIs ourselves and create a different random menu for each restaurant everytime user log to the app
 import MapScreen from "./screens/MapScreen";
@@ -14,6 +13,7 @@ import WelcomeScreen from "./screens/WelcomeScreen";
 import CheckoutScreen from "./screens/CheckoutScreen";
 import AccountScreen from "./screens/AccountScreen";
 import reducers from "./reducers";
+import { store, persistor } from "./store";
 
 const RootStack = createBottomTabNavigator(
   {
@@ -40,8 +40,6 @@ const RootStack = createBottomTabNavigator(
     }
   }
 );
-
-const store = createStore(reducers, {}, applyMiddleware());
 
 export default class App extends React.Component {
   render() {
