@@ -10,11 +10,16 @@ import {
 } from "react-native";
 import { Constants } from "expo";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { connect } from "react-redux";
 import RemoveIcon from "../components/RemoveIcon";
+
+import { saveTotalCost } from "../actions";
+
+// make an action creators, listen for user confirmation, add user order obj with { menu: [], total: }
 
 const QUANTITY_LIST = [1, 2, 3, 4];
 
-export default class OrderDetailScreen extends React.Component {
+class OrderDetailScreen extends React.Component {
   static navigationOptions = {
     title: "Order"
   };
@@ -25,7 +30,8 @@ export default class OrderDetailScreen extends React.Component {
     this.state = {
       selectedItem: this.props.navigation.state.params.menu[0].name,
       qty: 1,
-      listItem: []
+      listItem: [],
+      totalCost: 0
     };
   }
 
@@ -100,6 +106,7 @@ export default class OrderDetailScreen extends React.Component {
         "U sure don't want to order anything??"
       );
     } else {
+      this.props.saveTotalCost(this._calcTotal());
       return Alert.alert("Confirm", "Are you sure?", [
         {
           text: "Yes",
@@ -207,3 +214,5 @@ const styles = StyleSheet.create({
     padding: 10
   }
 });
+
+export default connect(null, { saveTotalCost })(OrderDetailScreen);

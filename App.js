@@ -12,6 +12,7 @@ import OrderDetailScreen from "./screens/OrderDetailScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import CheckoutScreen from "./screens/CheckoutScreen";
 import AccountScreen from "./screens/AccountScreen";
+import SummaryScreen from "./screens/SummaryScreen";
 import reducers from "./reducers";
 import { store, persistor } from "./store";
 
@@ -25,7 +26,8 @@ const RootStack = createBottomTabNavigator(
           Map: MapScreen,
           OrderDetail: OrderDetailScreen,
           Checkout: CheckoutScreen
-        })
+        }),
+        Summary: SummaryScreen
       },
       {
         navigationOptions: {

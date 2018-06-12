@@ -1,54 +1,95 @@
 import React, { Component } from "react";
-import { Text, ScrollView, View } from "react-native";
+import { View, Text, ScrollView, Alert, DatePickerIOS } from "react-native";
 import { Constants } from "expo";
-import axios from "axios";
+import { connect } from "react-redux";
+import { FormLabel, FormInput } from "react-native-elements";
+
+import { saveCreditCard } from "../actions";
+
 const stripe = require("stripe-client")("pk_test_Lknr2ayI1qvRhLbQXY0MHpF7");
+
+// check in store if it already any pending order
+// then check if user have saved credit card info and address
+// if not give a form to type in card info and place to pick up then confirm the time and place to pick up
+// else confirm the time and place to pick up
 
 const information = {
   card: {
     number: "4242424242424242",
     exp_month: "02",
     exp_year: "21",
-    cvc: "999",
-    name: "Billy Joe"
+    cvc: "999"
   }
 };
 
-export default class App extends Component {
+// save the card state into redux store
+//
+
+class CheckoutScreen extends Component {
   state = {
-    token: {}
-    // res: {}
+    token: {},
+    card: {
+      number: "",
+      exp_month: "",
+      exp_year: "",
+      cvc: ""
+    },
+    chosenDate: new Date()
   };
 
-  async componentDidMount() {
-    this.onPayment();
-  }
+  // async componentDidMount() {
+  //   this.onPayment();
+  // }
+  //
+  // async onPayment() {
+  //   var card = await stripe.createToken(information);
+  //   var token = card.id;
+  //   this.setState({ token });
+  // }
 
-  async onPayment() {
-    var card = await stripe.createToken(information);
-    var token = card.id;
-    this.setState({ token });
-
-    // try {
-    //   const res = await axios.post(
-    //     "http://192.168.56.1:5000/api/stripe",
-    //     this.state.token,
-    //     {
-    //       headers: {
-    //         "Access-Control-Allow-Origin": "*"
-    //       }
-    //     }
-    //   );
-    //   this.setState({ res });
-    // } catch (e) {
-    //   this.setState({ res: e });
-    // }
-  }
+  setDate = newDate => {
+    this.setState({
+      card: {
+        ...this.state.card,
+        exp_month: newDate.getMonth(),
+        exp_year: newDate.getFullYear()
+      },
+      chosenDate: newDate
+    });
+  };
 
   render() {
+    if (!this.props.totalCost) {
+      return (
+        <View contentContainerStyle={styles.contentContainer}>
+          <Text>{`You have not order anything`}</Text>
+        </View>
+      );
+    }
+
     return (
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.paragraph}>{JSON.stringify(this.state.token)}</Text>
+        {/* <Text style={styles.paragraph}>{JSON.stringify(this.state.token)}</Text> */}
+        <FormLabel>Card Number</FormLabel>
+        <FormInput
+          onChangeText={text =>
+            this.setState({ card: { ...this.state.card, number: text } })
+          }
+        />
+        <FormLabel>Expiry Date</FormLabel>
+        <DatePickerIOS
+          date={this.state.chosenDate}
+          onDateChange={this.setDate}
+          mode="date"
+        />
+        <FormLabel>CVC</FormLabel>
+        <FormInput
+          secureTextEntry={true}
+          onChangeText={text =>
+            this.setState({ card: { ...this.state.card, cvc: text } })
+          }
+        />
+        <Text>{JSON.stringify(this.state.card, null, 4)}</Text>
       </ScrollView>
     );
   }
@@ -68,3 +109,11 @@ const styles = {
     color: "#34495e"
   }
 };
+
+const mapStateToProps = state => {
+  return {
+    totalCost: state.totalCost
+  };
+};
+
+export default connect(mapStateToProps, { saveCreditCard })(CheckoutScreen);
