@@ -13,6 +13,7 @@ import WelcomeScreen from "./screens/WelcomeScreen";
 import CheckoutScreen from "./screens/CheckoutScreen";
 import AccountScreen from "./screens/AccountScreen";
 import SummaryScreen from "./screens/SummaryScreen";
+import CreditCardScreen from "./screens/CreditCardScreen";
 import reducers from "./reducers";
 import { store, persistor } from "./store";
 
@@ -21,7 +22,10 @@ const RootStack = createBottomTabNavigator(
     Welcome: WelcomeScreen,
     Main: createBottomTabNavigator(
       {
-        Account: AccountScreen,
+        Info: createStackNavigator({
+          Account: AccountScreen,
+          CreditCard: CreditCardScreen
+        }),
         Order: createStackNavigator({
           Map: MapScreen,
           OrderDetail: OrderDetailScreen,

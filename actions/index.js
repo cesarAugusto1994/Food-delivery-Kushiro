@@ -1,15 +1,15 @@
-import { TOTAL_COST, SAVE_CREDIT_CARD } from "./types";
+import { SAVE_CREDIT_CARD, SAVE_NEW_ORDER } from "./types";
 
-export const saveTotalCost = totalCost => {
+export const saveCreditCard = creditCard => {
   return {
-    type: TOTAL_COST,
-    payload: totalCost
+    type: SAVE_CREDIT_CARD,
+    payload: creditCard
   };
 };
 
-export const saveCreditCard = card => {
+export const saveOrder = order => {
   return {
-    type: SAVE_CREDIT_CARD,
-    payload: card
+    type: SAVE_NEW_ORDER,
+    payload: order
   };
 };

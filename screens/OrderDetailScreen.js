@@ -10,10 +10,7 @@ import {
 } from "react-native";
 import { Constants } from "expo";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { connect } from "react-redux";
 import RemoveIcon from "../components/RemoveIcon";
-
-import { saveTotalCost } from "../actions";
 
 // make an action creators, listen for user confirmation, add user order obj with { menu: [], total: }
 
@@ -106,11 +103,14 @@ class OrderDetailScreen extends React.Component {
         "U sure don't want to order anything??"
       );
     } else {
-      this.props.saveTotalCost(this._calcTotal());
       return Alert.alert("Confirm", "Are you sure?", [
         {
           text: "Yes",
-          onPress: () => this.props.navigation.navigate("Checkout")
+          onPress: () =>
+            this.props.navigation.navigate("Checkout", {
+              orderList: { ...this.state.listItem },
+              totalCost: this._calcTotal()
+            })
         },
         { text: "No", onPress: () => false }
       ]);
@@ -215,4 +215,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect(null, { saveTotalCost })(OrderDetailScreen);
+export default OrderDetailScreen;
