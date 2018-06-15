@@ -62,10 +62,10 @@ class OrderDetailScreen extends React.Component {
   };
 
   _updateList = () => {
-    if (this.state.listItem.length === 4) {
+    if (this.state.listItem.length > 3) {
       return Alert.alert(
         "Not available",
-        "You can not order more than 4 items."
+        "You can not order more than 3 items."
       );
     }
     // generate random ID between 1-1000 (both inclusive) for each item in the order list
@@ -109,7 +109,8 @@ class OrderDetailScreen extends React.Component {
           onPress: () =>
             this.props.navigation.navigate("Checkout", {
               orderList: { ...this.state.listItem },
-              totalCost: this._calcTotal()
+              totalCost: this._calcTotal(),
+              restaurant: this.props.navigation.state.params
             })
         },
         { text: "No", onPress: () => false }

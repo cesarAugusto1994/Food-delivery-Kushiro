@@ -21,9 +21,12 @@ const stripe = require("stripe-client")("pk_test_Lknr2ayI1qvRhLbQXY0MHpF7");
 // show the current billing info, if not show error message and don't allow them to finish
 //
 // warn user if they dont have any billing info
-// convert the address to lat lng coordinators
+//
+// find some ways to get user location from MapScreen
 // make axios call to distance matrix googleapi to get the eta
 // save the current order to redux-persist/redux-store and stop them to make any order in other screens
+// add countdown timer to the order
+// after the time, show the button to have the user confirm the status of the order. Then we can add the current order to AsyncStorage/redux-store prevOrders and reset the newOrder reducer
 // order obj: { menu: , total: , toAddress: , tokenStripe: }
 
 const INFORMATION = {
@@ -56,7 +59,7 @@ class CheckoutScreen extends Component {
               })
             }
           >
-            <Text>Touch here to add one</Text>
+            <Text>Add one</Text>
           </TouchableOpacity>
         </View>
       );
@@ -78,31 +81,34 @@ class CheckoutScreen extends Component {
       actions: [NavigationActions.navigate({ routeName: "Map" })]
     });
 
-    const { orderList, totalCost } = this.props.navigation.state.params;
-
+    const {
+      orderList,
+      totalCost,
+      // destructuring and rename
+      restaurant: { location: restaurantLocation }
+    } = this.props.navigation.state.params;
+    let card, token;
     try {
-      const card = await stripe.createToken(INFORMATION);
-      const token = card.id;
-
-      this.props.saveOrder({
-        menu: orderList,
-        totalCost: totalCost,
-        toAddress: this.state.address,
-        stripeToken: token
-      });
+      card = await stripe.createToken(INFORMATION);
+      token = card.id;
     } catch (e) {
-      // REFACTOR: reset the value in 'newOrder'
-      return Alert.alert(
-        "Warning",
-        `Error has occurred. Please order again. Error Name: ${e}`,
-        [
-          {
-            text: "Ok",
-            onPress: () => this.props.navigation.dispatch(resetAction)
-          }
-        ]
-      );
+      // REFACTOR: reset the value in 'newOrder' reducer/store
+      return Alert.alert("Warning", "Error has occurred. Please order again.", [
+        {
+          text: "Ok",
+          onPress: () => this.props.navigation.dispatch(resetAction)
+        }
+      ]);
     }
+
+    this.props.saveOrder({
+      menu: orderList,
+      totalCost: totalCost,
+      toAddress: this.state.address,
+      stripeToken: token,
+      userLocation: this.props.userLocation,
+      restaurantLocation
+    });
 
     this.setState({ isLoading: false });
 
@@ -147,11 +153,12 @@ class CheckoutScreen extends Component {
         style={styles.contentContainer}
         pointerEvents={this.state.isLoading ? "none" : "auto"}
       >
-        {/* <Text style={styles.paragraph}>{JSON.stringify(this.state.token)}</Text> */}
         {this._showCreditCardInfo()}
         <Text>{`You have an order with total cost: ${totalCost}`}</Text>
-        {/* REFACTOR: We ask for user location before. Leave it here as an option. */}
-        <FormLabel>Address you want to deliver to: </FormLabel>
+        <FormLabel>
+          Address you want to deliver to: (if empty we will deliver to your
+          location)
+        </FormLabel>
         <FormInput onChangeText={text => this.setState({ address: text })} />
         {/* REFACTOR: button made from TouchableOpacity should be make as a component, we use this kind of button everywhere and we also ask for confirmation everytime. */}
         <TouchableOpacity onPress={() => this._submitAddress()}>
@@ -196,7 +203,8 @@ const styles = {
 
 const mapStateToProps = state => {
   return {
-    creditCard: state.creditCard
+    creditCard: state.creditCard,
+    userLocation: state.userLocation
   };
 };
 

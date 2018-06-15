@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Picker,
+  Alert,
   StyleSheet,
   View,
   Text,
@@ -10,12 +10,14 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { Location, Permissions } from "expo";
+import { connect } from "react-redux";
 
+import { saveUserLocation } from "../actions";
 import markers from "../constants/restaurants.json";
 
 const PANEL_HEIGHT = 250;
 
-export default class MapScreen extends React.Component {
+class MapScreen extends React.Component {
   static navigationOptions = {
     title: "Map"
   };
@@ -56,6 +58,8 @@ export default class MapScreen extends React.Component {
 
     let location = await Location.getCurrentPositionAsync({});
     this.setState({ location });
+
+    this.props.saveUserLocation(location);
 
     this.setState({
       region: {
@@ -115,9 +119,15 @@ export default class MapScreen extends React.Component {
           />
           <TouchableOpacity
             style={styles.button}
-            onPress={() =>
-              this.props.navigation.navigate("OrderDetail", restaurant)
-            }
+            onPress={() => {
+              if (this.props.newOrder.stripeToken) {
+                return Alert.alert(
+                  "Not available",
+                  "You already have an order on its way. Please wait after it is finished."
+                );
+              }
+              this.props.navigation.navigate("OrderDetail", restaurant);
+            }}
           >
             <Text>Start Ordering</Text>
           </TouchableOpacity>
@@ -190,3 +200,11 @@ const styles = StyleSheet.create({
     padding: 10
   }
 });
+
+const mapStateToProps = state => {
+  return {
+    newOrder: state.newOrder
+  };
+};
+
+export default connect(mapStateToProps, { saveUserLocation })(MapScreen);

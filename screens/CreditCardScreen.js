@@ -38,7 +38,7 @@ class CreditCardScreen extends Component {
       }
     });
   };
-
+  // REFACTOR: return the user to the page from where he was before (pop the navigation stack)
   _submitCreditCardInfo = () => {
     return Alert.alert("Confirm", "Are you sure ?", [
       {
@@ -56,7 +56,7 @@ class CreditCardScreen extends Component {
   };
 
   render() {
-    // refactor: add error handling/messages and regex check
+    // REFACTOR: add error handling/messages and regex check
     return (
       <ScrollView>
         <FormLabel>Name</FormLabel>
