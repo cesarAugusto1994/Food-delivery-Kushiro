@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { connect } from "react-redux";
 
 import { handleConfirmedOrder } from "../actions";
@@ -21,8 +21,8 @@ class SummaryScreen extends Component {
     super(props);
 
     this.state = {
-      isDelivered: false,
-      timeLeft: 60 * 60
+      isDelivered: null,
+      // timeLeft: 60 * 60
     };
 
     this.interval = "";
@@ -31,69 +31,65 @@ class SummaryScreen extends Component {
   componentDidMount() {
     console.log("componentDidMount is called");
     if (this.props.newOrder.stripeToken) {
-      console.log("_handleDelivery is called");
       this.setState({ isDelivered: false });
-      this._handleDelivery();
+      // this._handleDelivery();
     }
   }
   // when do we want this function to run ?
   // when user create an new order
+  // this function can only run when this.state.isDelivered === false
   // componentDidUpdate(prevProps) {
   //   console.log("componentDidUpdate is called");
-  //   console.log(prevProps.newOrder.timeLeft);
-  //   console.log(this.props.newOrder.timeLeft);
   //   if (this.props.newOrder.stripeToken) {
-  //     if (!this.state.isDelivered) {
-  //       this._handleDelivery();
-  //     } else {
-  //       clearInterval(this.interval);
-  //     }
+  //     this._handleDelivery();
+  //   } else {
+  //     clearInterval(this.interval);
   //   }
   // }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    console.log("getDerivedStateFromProps is called");
-    if (nextProps.newOrder.timeLeft === -1) {
-      return {
-        timeLeft: 60 * 60
-      };
-    } else if (prevState.timeLeft > nextProps.newOrder.timeLeft) {
-      return {
-        timeLeft: nextProps.newOrder.timeLeft
-      };
-    }
-
-    return null;
-  }
+  // static getDerivedStateFromProps(nextProps, prevState) {
+  //   console.log("getDerivedStateFromProps is called");
+  //   if (nextProps.newOrder.timeLeft === -1) {
+  //     return {
+  //       timeLeft: 60 * 60
+  //     };
+  //   } else if (prevState.timeLeft > nextProps.newOrder.timeLeft) {
+  //     return {
+  //       timeLeft: nextProps.newOrder.timeLeft
+  //     };
+  //   }
+  //   return null;
+  // }
 
   // BUG: after confirm one order, create a new order will not run the countdown
   // BUG: try to update component state after getDerivedStateFromProps is not possible
   // FALLBACK SOLUTION: just show the exact real time on clock when it arrives.
-  _handleDelivery = () => {
-    if (this.state.timeLeft >= 0) {
-      console.log("_countDown is called");
-      this.interval = setInterval(() => this._countDown(), 1000);
-    } else {
-      console.log("_countDown is called");
-      this._showConfirmButton();
-    }
-  };
-  _countDown = () => {
-    if (this.state.timeLeft > 0) {
-      this.setState({ timeLeft: this.state.timeLeft - 1 });
-    } else {
-      clearInterval(this.interval);
-      this._showConfirmButton();
-    }
-  };
+  // _handleDelivery = () => {
+  //   if (this.state.timeLeft > 0) {
+  //     console.log("_countDown is called");
+  //     this.interval = setInterval(() => this._countDown(), 1000);
+  //   } else {
+  //     this._showConfirmButton();
+  //   }
+  // };
+  // _countDown = () => {
+  //   if (this.state.timeLeft > 0) {
+  //     this.setState({ timeLeft: this.state.timeLeft - 1 });
+  //   } else {
+  //     this._showConfirmButton();
+  //   }
+  // };
 
-  _showConfirmButton = () => {
-    this.setState({ isDelivered: true });
-  };
+  // _showConfirmButton = () => {
+  //   this.setState({ isDelivered: true });
+  // };
 
   _confirmSuccessfulDelivery = () => {
+    if (this.props.newOrder.timeToDest > new Date().getTime()){
+      return Alert.alert("Not Available", "Package is not delivered yet.");
+    }
+    this.setState({ isDelivered: null });
     this.props.handleConfirmedOrder(this.props.newOrder);
-    this.setState({ isDelivered: false });
   };
 
   render() {
@@ -102,7 +98,6 @@ class SummaryScreen extends Component {
       return (
         <ScrollView>
           <Text>You don't have any pending order</Text>
-          <Text>{`timeLeft state: ${this.state.timeLeft}`}</Text>
           <Text>{`isDelivered state/confirmed button shown: ${
             this.state.isDelivered
           }`}</Text>
@@ -118,14 +113,9 @@ class SummaryScreen extends Component {
         <Text>{`With total cost: ${totalCost}`}</Text>
         <Text>{`To address: ${destAddress}`}</Text>
         <Text>{`Your purchase id (stripe token): ${stripeToken}`}</Text>
-        <Text>{`Estimated time for delivery: ${
-          this.state.timeLeft
+        <Text>{`Estimated time to delivery: ${
+          new Date(this.props.newOrder.timeToDest)
         } seconds`}</Text>
-        {this.state.isDelivered && (
-          <TouchableOpacity onPress={this._confirmSuccessfulDelivery}>
-            <Text>Confirm delivery</Text>
-          </TouchableOpacity>
-        )}
         <TouchableOpacity onPress={this._confirmSuccessfulDelivery}>
           <Text>Confirm delivery</Text>
         </TouchableOpacity>
@@ -139,8 +129,8 @@ const mapStateToProps = state => {
   console.log("mapStateToProps is called");
   return {
     newOrder: {
-      ...state.newOrder,
-      timeLeft: getTimeLeft(state.newOrder.timeToDest)
+      ...state.newOrder
+      // timeLeft: getTimeLeft(state.newOrder.timeToDest)
       // timeLeft: 10
     }
   };

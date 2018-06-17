@@ -35,8 +35,7 @@ export const saveOrder = order => async dispatch => {
       payload: {
         ...order,
         timeToDest:
-          // response.data.rows[0].elements[0].duration.value * 1000 +
-          90 * 1000 + new Date().getTime(),
+          response.data.rows[0].elements[0].duration.value * 1000 + new Date().getTime(),
         destAddress: response.data.destination_addresses[0]
       }
     });
