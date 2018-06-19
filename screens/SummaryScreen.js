@@ -6,86 +6,27 @@ import { handleConfirmedOrder } from "../actions";
 import { getTimeLeft } from "../helpers/timeLeftHelper";
 
 class SummaryScreen extends Component {
-  // show the current order and the eta time,
-  // after the duration, show a button to user to confirm the status of the order
-  // if done
-  // empty the current order reducer and concat this order to prevOrders in redux-persist/AsyncStorages
-  // if not
-  // (brainstorm later)
-  // everytime this summaryscreen is rendered, check if there is any pending order on the list, if no => best case
-  // if yes, check the difference between date now(a) and estimated arrival time(b)
-  // if a >= b, show button for user to confirm the delivery or report error
-  // if a < b, show the order and how much time left
+  static navigationOptions = {
+    title: "Summary"
+  };
 
   constructor(props) {
     super(props);
 
     this.state = {
-      isDelivered: null,
-      // timeLeft: 60 * 60
+      isDelivered: null
     };
-
-    this.interval = "";
   }
 
   componentDidMount() {
     console.log("componentDidMount is called");
     if (this.props.newOrder.stripeToken) {
       this.setState({ isDelivered: false });
-      // this._handleDelivery();
     }
   }
-  // when do we want this function to run ?
-  // when user create an new order
-  // this function can only run when this.state.isDelivered === false
-  // componentDidUpdate(prevProps) {
-  //   console.log("componentDidUpdate is called");
-  //   if (this.props.newOrder.stripeToken) {
-  //     this._handleDelivery();
-  //   } else {
-  //     clearInterval(this.interval);
-  //   }
-  // }
-
-  // static getDerivedStateFromProps(nextProps, prevState) {
-  //   console.log("getDerivedStateFromProps is called");
-  //   if (nextProps.newOrder.timeLeft === -1) {
-  //     return {
-  //       timeLeft: 60 * 60
-  //     };
-  //   } else if (prevState.timeLeft > nextProps.newOrder.timeLeft) {
-  //     return {
-  //       timeLeft: nextProps.newOrder.timeLeft
-  //     };
-  //   }
-  //   return null;
-  // }
-
-  // BUG: after confirm one order, create a new order will not run the countdown
-  // BUG: try to update component state after getDerivedStateFromProps is not possible
-  // FALLBACK SOLUTION: just show the exact real time on clock when it arrives.
-  // _handleDelivery = () => {
-  //   if (this.state.timeLeft > 0) {
-  //     console.log("_countDown is called");
-  //     this.interval = setInterval(() => this._countDown(), 1000);
-  //   } else {
-  //     this._showConfirmButton();
-  //   }
-  // };
-  // _countDown = () => {
-  //   if (this.state.timeLeft > 0) {
-  //     this.setState({ timeLeft: this.state.timeLeft - 1 });
-  //   } else {
-  //     this._showConfirmButton();
-  //   }
-  // };
-
-  // _showConfirmButton = () => {
-  //   this.setState({ isDelivered: true });
-  // };
 
   _confirmSuccessfulDelivery = () => {
-    if (this.props.newOrder.timeToDest > new Date().getTime()){
+    if (this.props.newOrder.timeToDest > new Date().getTime()) {
       return Alert.alert("Not Available", "Package is not delivered yet.");
     }
     this.setState({ isDelivered: null });
@@ -93,7 +34,6 @@ class SummaryScreen extends Component {
   };
 
   render() {
-    // REFACTOR: check if an object is empty, lodash maybe????
     if (!this.props.newOrder.stripeToken) {
       return (
         <ScrollView>
@@ -105,7 +45,12 @@ class SummaryScreen extends Component {
       );
     }
 
-    const { menu, totalCost, destAddress, stripeToken } = this.props.newOrder;
+    const {
+      menu,
+      totalCost,
+      userLocation: { destAddress },
+      stripeToken
+    } = this.props.newOrder;
 
     return (
       <ScrollView>
@@ -113,9 +58,9 @@ class SummaryScreen extends Component {
         <Text>{`With total cost: ${totalCost}`}</Text>
         <Text>{`To address: ${destAddress}`}</Text>
         <Text>{`Your purchase id (stripe token): ${stripeToken}`}</Text>
-        <Text>{`Estimated time to delivery: ${
-          new Date(this.props.newOrder.timeToDest)
-        } seconds`}</Text>
+        <Text>{`Estimated time to delivery: ${new Date(
+          this.props.newOrder.timeToDest
+        )} seconds`}</Text>
         <TouchableOpacity onPress={this._confirmSuccessfulDelivery}>
           <Text>Confirm delivery</Text>
         </TouchableOpacity>
@@ -124,15 +69,10 @@ class SummaryScreen extends Component {
   }
 }
 
-// REFACTOR: we will save newOrder into prevOrders after it is confirmed. Should we save timeLeft props somewhere and avoid put it in newOrder props ?
 const mapStateToProps = state => {
   console.log("mapStateToProps is called");
   return {
-    newOrder: {
-      ...state.newOrder
-      // timeLeft: getTimeLeft(state.newOrder.timeToDest)
-      // timeLeft: 10
-    }
+    newOrder: state.newOrder
   };
 };
 

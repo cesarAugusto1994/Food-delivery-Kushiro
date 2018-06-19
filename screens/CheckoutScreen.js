@@ -39,6 +39,10 @@ const INFORMATION = {
 };
 
 class CheckoutScreen extends Component {
+  static navigationOptions = {
+    title: "Checkout"
+  };
+
   state = {
     address: "",
     isLoading: false
@@ -85,7 +89,7 @@ class CheckoutScreen extends Component {
       orderList,
       totalCost,
       // destructuring and rename
-      restaurant: { location: restaurantLocation }
+      restaurant
     } = this.props.navigation.state.params;
     let card, token;
     try {
@@ -107,7 +111,7 @@ class CheckoutScreen extends Component {
       toAddress: this.state.address,
       stripeToken: token,
       userLocation: this.props.userLocation,
-      restaurantLocation
+      restaurant
     });
 
     this.setState({ isLoading: false });
@@ -189,7 +193,8 @@ const styles = {
     color: "#34495e"
   },
   loading: {
-    position: "absolute",
+    flex: 1,
+    // position: "absolute",
     left: 0,
     right: 0,
     top: 0,

@@ -1,37 +1,78 @@
 import React, { Component } from "react";
 import { Text, View, TouchableOpacity, ScrollView } from "react-native";
-import { Constants } from "expo";
+import { Constants, LinearGradient } from "expo";
 import { connect } from "react-redux";
+import { PricingCard } from "react-native-elements";
 
 class AccountScreen extends Component {
-  _renderCreditCard = () => {
-    if (this.props.creditCard) {
-      const { number, cvc, name, exp_month, exp_year } = this.props.creditCard;
-      return (
-        <ScrollView>
-          <Text>{name}</Text>
-          <Text>{number}</Text>
-          <Text>{`${exp_month}/${exp_year}`}</Text>
-          <Text>{cvc}</Text>
-          <TouchableOpacity
-            onPress={() => this.props.navigation.navigate("CreditCard")}
-          >
-            <Text>Add/Change Credit Card Info</Text>
-          </TouchableOpacity>
+  static navigationOptions = {
+    title: "Account"
+  };
 
-          <Text>{`Previous orders: ${JSON.stringify(
-            this.props.prevOrders,
-            null,
-            4
-          )}`}</Text>
-        </ScrollView>
+  _renderCreditCard = () => {
+    if (!this.props.creditCard) {
+      return <Text>You haven't submitted any credit card info.</Text>;
+    }
+
+    const { number, cvc, name, exp_month, exp_year } = this.props.creditCard;
+    return (
+      <View>
+        <PricingCard
+          color="#4f9deb"
+          title={name}
+          info={[number, `${exp_month}/${exp_year}`, cvc]}
+          button={{ title: "Add/Change Credit Card Info" }}
+          onButtonPress={() => this.props.navigation.navigate("CreditCard")}
+        />
+      </View>
+    );
+  };
+
+  _renderPrevOrders = () => {
+    if (!this.props.prevOrders) {
+      return (
+        <Text style={styles.paragraph}>You haven't made any orders yet.</Text>
       );
     }
+
+    return this.props.prevOrders.map((order, i) => (
+      <LinearGradient
+        key={i}
+        colors={["#FF9800", "#F44336"]}
+        style={{
+          padding: 15,
+          // alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 5,
+          marginTop: 10
+        }}
+        start={[1, 0]}
+        end={[0.2, 0]}
+      >
+        <Text
+          style={{
+            backgroundColor: "transparent",
+            fontSize: 18,
+            color: "#fff",
+            textAlign: "center"
+          }}
+        >
+          {`Order ${i}`}
+        </Text>
+        <Text>{`Order made at: ${new Date(order.orderMadeAt)}`}</Text>
+        <Text>{`Total cost: ${order.totalCost}￥`}</Text>
+        <Text>{`Name of restaurant: ${order.restaurant.name}`}</Text>
+        <Text>{`Deliver to address: ${order.userLocation.destAddress}`}</Text>
+      </LinearGradient>
+    ));
   };
 
   render() {
     return (
-      <View style={styles.contentContainer}>{this._renderCreditCard()}</View>
+      <ScrollView style={styles.contentContainer}>
+        {this._renderCreditCard()}
+        {this._renderPrevOrders()}
+      </ScrollView>
     );
   }
 }

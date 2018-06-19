@@ -20,7 +20,7 @@ export const saveCreditCard = creditCard => {
 
 export const saveOrder = order => async dispatch => {
   const {
-    restaurantLocation: { lat, lng },
+    restaurant: { location: { lat, lng } },
     userLocation: { coords: { latitude, longitude } }
   } = order;
   let response;
@@ -34,9 +34,15 @@ export const saveOrder = order => async dispatch => {
       type: SAVE_NEW_ORDER,
       payload: {
         ...order,
+        userLocation: {
+          ...order.userLocation,
+          destAddress: response.data.destination_addresses[0]
+        },
+        orderMadeAt: new Date().getTime(),
         timeToDest:
-          response.data.rows[0].elements[0].duration.value * 1000 + new Date().getTime(),
-        destAddress: response.data.destination_addresses[0]
+          response.data.rows[0].elements[0].duration.value * 1000 +
+          // 60 +
+          new Date().getTime()
       }
     });
   } catch (e) {
