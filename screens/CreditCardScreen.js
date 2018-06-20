@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { FormLabel, FormInput } from "react-native-elements";
 import { connect } from "react-redux";
+import { StackActions, NavigationActions } from "react-navigation";
 
 import { saveCreditCard } from "../actions";
 
@@ -40,12 +41,20 @@ class CreditCardScreen extends Component {
   };
   // REFACTOR: return the user to the page from where he was before (pop the navigation stack)
   _submitCreditCardInfo = () => {
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: "Account" })]
+    });
+
     return Alert.alert("Confirm", "Are you sure ?", [
       {
         text: "Yes",
         onPress: () => {
           this.props.saveCreditCard(this.state.card);
-          this.props.navigation.navigate("Account");
+          this.props.navigation.dispatch(resetAction);
+          this.props.navigation.navigate(
+            this.props.navigation.state.params.returnToScreen
+          );
         }
       },
       {

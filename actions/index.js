@@ -40,9 +40,8 @@ export const saveOrder = order => async dispatch => {
         },
         orderMadeAt: new Date().getTime(),
         timeToDest:
-          response.data.rows[0].elements[0].duration.value * 1000 +
-          // 60 +
-          new Date().getTime()
+          // response.data.rows[0].elements[0].duration.value * 1000 +
+          60 + new Date().getTime()
       }
     });
   } catch (e) {

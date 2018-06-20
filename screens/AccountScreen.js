@@ -11,7 +11,16 @@ class AccountScreen extends Component {
 
   _renderCreditCard = () => {
     if (!this.props.creditCard) {
-      return <Text>You haven't submitted any credit card info.</Text>;
+      return (
+        <View>
+          <Text>You haven't submitted any credit card info.</Text>
+          <TouchableOpacity
+            onPress={() => this.props.navigation.navigate("CreditCard")}
+          >
+            <Text>Add one here</Text>
+          </TouchableOpacity>
+        </View>
+      );
     }
 
     const { number, cvc, name, exp_month, exp_year } = this.props.creditCard;
@@ -22,7 +31,11 @@ class AccountScreen extends Component {
           title={name}
           info={[number, `${exp_month}/${exp_year}`, cvc]}
           button={{ title: "Add/Change Credit Card Info" }}
-          onButtonPress={() => this.props.navigation.navigate("CreditCard")}
+          onButtonPress={() =>
+            this.props.navigation.navigate("CreditCard", {
+              returnToScreen: "Account"
+            })
+          }
         />
       </View>
     );
@@ -41,7 +54,6 @@ class AccountScreen extends Component {
         colors={["#FF9800", "#F44336"]}
         style={{
           padding: 15,
-          // alignItems: "center",
           justifyContent: "center",
           borderRadius: 5,
           marginTop: 10
@@ -71,6 +83,7 @@ class AccountScreen extends Component {
     return (
       <ScrollView style={styles.contentContainer}>
         {this._renderCreditCard()}
+        <Text style={styles.paragraph}>Your last 3 orders</Text>
         {this._renderPrevOrders()}
       </ScrollView>
     );

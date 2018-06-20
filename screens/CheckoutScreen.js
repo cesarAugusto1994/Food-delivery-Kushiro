@@ -5,38 +5,18 @@ import {
   ScrollView,
   Alert,
   TouchableOpacity,
-  ActivityIndicator
+  ActivityIndicator,
+  Modal,
+  TextInput
 } from "react-native";
-import { Constants } from "expo";
 import { connect } from "react-redux";
-import { FormLabel, FormInput } from "react-native-elements";
+import { FormInput, PricingCard } from "react-native-elements";
 import { StackActions, NavigationActions } from "react-navigation";
 
 import { saveOrder } from "../actions";
+import { STRIPE_PUBLIC_KEY, CREDIT_CARD_INFO } from "../config";
 
-const stripe = require("stripe-client")("pk_test_Lknr2ayI1qvRhLbQXY0MHpF7");
-
-// input to fill in which address to deliver
-// button to finish the order
-// show the current billing info, if not show error message and don't allow them to finish
-//
-// warn user if they dont have any billing info
-//
-// find some ways to get user location from MapScreen
-// make axios call to distance matrix googleapi to get the eta
-// save the current order to redux-persist/redux-store and stop them to make any order in other screens
-// add countdown timer to the order
-// after the time, show the button to have the user confirm the status of the order. Then we can add the current order to AsyncStorage/redux-store prevOrders and reset the newOrder reducer
-// order obj: { menu: , total: , toAddress: , tokenStripe: }
-
-const INFORMATION = {
-  card: {
-    number: "4242424242424242",
-    exp_month: "02",
-    exp_year: "21",
-    cvc: "999"
-  }
-};
+const stripe = require("stripe-client")(STRIPE_PUBLIC_KEY);
 
 class CheckoutScreen extends Component {
   static navigationOptions = {
@@ -68,18 +48,27 @@ class CheckoutScreen extends Component {
         </View>
       );
     }
-
+    const { number, cvc, name, exp_month, exp_year } = this.props.creditCard;
+    // REFACTOR: pass the name of the screen as props, so that user can return to the page where he previously was
     return (
-      <Text>{`Your credit card info: ${JSON.stringify(
-        this.props.creditCard,
-        null,
-        4
-      )}`}</Text>
+      <View>
+        <PricingCard
+          color="#4f9deb"
+          title={name}
+          info={[number, `${exp_month}/${exp_year}`, cvc]}
+          button={{ title: "Change Credit Card Info" }}
+          onButtonPress={() =>
+            this.props.navigation.navigate("CreditCard", {
+              returnToScreen: "Checkout"
+            })
+          }
+        />
+      </View>
     );
   };
 
   _handleSubmitAddress = async () => {
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: !this.state.isLoading });
     const resetAction = StackActions.reset({
       index: 0,
       actions: [NavigationActions.navigate({ routeName: "Map" })]
@@ -93,10 +82,9 @@ class CheckoutScreen extends Component {
     } = this.props.navigation.state.params;
     let card, token;
     try {
-      card = await stripe.createToken(INFORMATION);
+      card = await stripe.createToken(CREDIT_CARD_INFO);
       token = card.id;
     } catch (e) {
-      // REFACTOR: reset the value in 'newOrder' reducer/store
       return Alert.alert("Warning", "Error has occurred. Please order again.", [
         {
           text: "Ok",
@@ -114,18 +102,22 @@ class CheckoutScreen extends Component {
       restaurant
     });
 
-    this.setState({ isLoading: false });
+    this.setState({ isLoading: !this.state.isLoading });
 
-    return Alert.alert(
-      "Successful",
-      "Your order has been confirmed. Check the order's status on Summary tab",
-      [
+    // FIXED BUG: can't call Alert right after set the state of 'isLoading', setTimeout is a temporary workaround => react-native issues
+    setTimeout(() => {
+      Alert.alert("Successful", "Your order has been confirmed.", [
         {
           text: "Ok",
-          onPress: () => this.props.navigation.dispatch(resetAction)
+          onPress: () => {
+            this.props.navigation.dispatch(resetAction);
+            this.props.navigation.navigate("Summary");
+          }
         }
-      ]
-    );
+      ]);
+    }, 100);
+
+    return true;
   };
 
   _submitAddress = () => {
@@ -153,27 +145,27 @@ class CheckoutScreen extends Component {
     }
 
     return (
-      <View
-        style={styles.contentContainer}
-        pointerEvents={this.state.isLoading ? "none" : "auto"}
-      >
+      <ScrollView contentContainerStyle={styles.contentContainer}>
         {this._showCreditCardInfo()}
-        <Text>{`You have an order with total cost: ${totalCost}`}</Text>
-        <FormLabel>
+        <Text style={styles.paragraph}>{`Total cost: ${totalCost}￥`}</Text>
+        <Text style={styles.paragraph}>
           Address you want to deliver to: (if empty we will deliver to your
           location)
-        </FormLabel>
+        </Text>
         <FormInput onChangeText={text => this.setState({ address: text })} />
         {/* REFACTOR: button made from TouchableOpacity should be make as a component, we use this kind of button everywhere and we also ask for confirmation everytime. */}
-        <TouchableOpacity onPress={() => this._submitAddress()}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => this._submitAddress()}
+        >
           <Text>Submit</Text>
         </TouchableOpacity>
-        {this.state.isLoading && (
+        <Modal transparent={true} visible={this.state.isLoading}>
           <View style={styles.loading}>
             <ActivityIndicator size="large" color="#0000ff" />
           </View>
-        )}
-      </View>
+        </Modal>
+      </ScrollView>
     );
   }
 }
@@ -181,20 +173,19 @@ class CheckoutScreen extends Component {
 const styles = {
   contentContainer: {
     flex: 1,
-    paddingTop: Constants.statusBarHeight,
     backgroundColor: "#ecf0f1",
-    justifyContent: "center"
+    justifyContent: "center",
+    alignItems: "center"
   },
   paragraph: {
-    margin: 24,
-    fontSize: 18,
+    margin: 10,
+    fontSize: 15,
     fontWeight: "bold",
     textAlign: "center",
     color: "#34495e"
   },
   loading: {
-    flex: 1,
-    // position: "absolute",
+    position: "absolute",
     left: 0,
     right: 0,
     top: 0,
@@ -203,6 +194,12 @@ const styles = {
     backgroundColor: "black",
     justifyContent: "center",
     alignItems: "center"
+  },
+  button: {
+    alignItems: "center",
+    backgroundColor: "#DDDDDD",
+    padding: 10,
+    marginTop: 15
   }
 };
 
