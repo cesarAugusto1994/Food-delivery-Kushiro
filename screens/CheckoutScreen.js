@@ -13,6 +13,7 @@ import { connect } from "react-redux";
 import { FormInput, PricingCard } from "react-native-elements";
 import { StackActions, NavigationActions } from "react-navigation";
 
+import SubmitButton from "../components/SubmitButton";
 import { saveOrder } from "../actions";
 import { STRIPE_PUBLIC_KEY, CREDIT_CARD_INFO } from "../config";
 
@@ -49,11 +50,10 @@ class CheckoutScreen extends Component {
       );
     }
     const { number, cvc, name, exp_month, exp_year } = this.props.creditCard;
-    // REFACTOR: pass the name of the screen as props, so that user can return to the page where he previously was
     return (
       <View>
         <PricingCard
-          color="#4f9deb"
+          color="#F44336"
           title={name}
           info={[number, `${exp_month}/${exp_year}`, cvc]}
           button={{ title: "Change Credit Card Info" }}
@@ -77,7 +77,6 @@ class CheckoutScreen extends Component {
     const {
       orderList,
       totalCost,
-      // destructuring and rename
       restaurant
     } = this.props.navigation.state.params;
     let card, token;
@@ -153,16 +152,10 @@ class CheckoutScreen extends Component {
           location)
         </Text>
         <FormInput onChangeText={text => this.setState({ address: text })} />
-        {/* REFACTOR: button made from TouchableOpacity should be make as a component, we use this kind of button everywhere and we also ask for confirmation everytime. */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => this._submitAddress()}
-        >
-          <Text>Submit</Text>
-        </TouchableOpacity>
+        <SubmitButton onPress={this._handleSubmitAddress} />
         <Modal transparent={true} visible={this.state.isLoading}>
           <View style={styles.loading}>
-            <ActivityIndicator size="large" color="#0000ff" />
+            <ActivityIndicator size="large" color="#4f9deb" />
           </View>
         </Modal>
       </ScrollView>
@@ -194,12 +187,6 @@ const styles = {
     backgroundColor: "black",
     justifyContent: "center",
     alignItems: "center"
-  },
-  button: {
-    alignItems: "center",
-    backgroundColor: "#DDDDDD",
-    padding: 10,
-    marginTop: 15
   }
 };
 

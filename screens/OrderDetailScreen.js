@@ -12,9 +12,7 @@ import { Constants } from "expo";
 import Icon from "react-native-vector-icons/FontAwesome";
 import RemoveIcon from "../components/RemoveIcon";
 
-// make an action creators, listen for user confirmation, add user order obj with { menu: [], total: }
-
-const QUANTITY_LIST = [1, 2, 3, 4];
+const QUANTITY_LIST = [1, 2, 3];
 
 class OrderDetailScreen extends React.Component {
   static navigationOptions = {
@@ -62,7 +60,7 @@ class OrderDetailScreen extends React.Component {
   };
 
   _updateList = () => {
-    if (this.state.listItem.length > 3) {
+    if (this.state.listItem.length >= 3) {
       return Alert.alert(
         "Not available",
         "You can not order more than 3 items."
@@ -89,7 +87,6 @@ class OrderDetailScreen extends React.Component {
       return (
         <Text style={styles.items} key={index}>
           {`${item.name} * ${item.qty}`}
-          {/* this seems unnecessary but mostly to practice using reusable component */}
           <RemoveIcon size={24} onPress={() => this._removeItem(item)} />
         </Text>
       );

@@ -1,9 +1,17 @@
+import _ from "lodash";
 import React, { Component } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  FlatList
+} from "react-native";
 import { connect } from "react-redux";
+import { PricingCard } from "react-native-elements";
 
 import { handleConfirmedOrder } from "../actions";
-import { getTimeLeft } from "../helpers/timeLeftHelper";
 
 class SummaryScreen extends Component {
   static navigationOptions = {
@@ -19,7 +27,6 @@ class SummaryScreen extends Component {
   }
 
   componentDidMount() {
-    console.log("componentDidMount is called");
     if (this.props.newOrder.stripeToken) {
       this.setState({ isDelivered: false });
     }
@@ -33,14 +40,15 @@ class SummaryScreen extends Component {
     this.props.handleConfirmedOrder(this.props.newOrder);
   };
 
+  _keyExtractor = (item, index) => `${index}`;
+
   render() {
     if (!this.props.newOrder.stripeToken) {
       return (
-        <ScrollView>
-          <Text>You don't have any pending order</Text>
-          <Text>{`isDelivered state/confirmed button shown: ${
-            this.state.isDelivered
-          }`}</Text>
+        <ScrollView contentContainerStyle={styles.emptyWrapper}>
+          <Text style={styles.listWrapperTitle}>
+            You don't have any pending order
+          </Text>
         </ScrollView>
       );
     }
@@ -49,30 +57,69 @@ class SummaryScreen extends Component {
       menu,
       totalCost,
       userLocation: { destAddress },
-      stripeToken
+      stripeToken,
+      timeToDest
     } = this.props.newOrder;
 
     return (
       <ScrollView>
-        <Text>{`You have a new order: ${JSON.stringify(menu, null, 4)}`}</Text>
-        <Text>{`With total cost: ${totalCost}`}</Text>
-        <Text>{`To address: ${destAddress}`}</Text>
-        <Text>{`Your purchase id (stripe token): ${stripeToken}`}</Text>
-        <Text>{`Estimated time to delivery: ${new Date(
-          this.props.newOrder.timeToDest
-        )} seconds`}</Text>
-        <TouchableOpacity onPress={this._confirmSuccessfulDelivery}>
-          <Text>Confirm delivery</Text>
-        </TouchableOpacity>
+        <View style={styles.listWrapper}>
+          <Text style={styles.listWrapperTitle}>List of order item:</Text>
+          <FlatList
+            data={menu}
+            renderItem={({ item }) => (
+              <Text style={styles.listItem}>{`${item.name} * ${
+                item.qty
+              }`}</Text>
+            )}
+            keyExtractor={this._keyExtractor}
+          />
+        </View>
+        <PricingCard
+          color="#F44336"
+          title="Your new order"
+          price={`${totalCost}￥`}
+          info={[
+            `Estimated arrival time: ${new Date(timeToDest)}`,
+            `To address: ${destAddress}`,
+            `Your purchase id: ${stripeToken}`
+          ]}
+          button={{ title: "Confirm delivery" }}
+          onButtonPress={() => this._confirmSuccessfulDelivery()}
+        />
       </ScrollView>
     );
   }
 }
 
+const styles = {
+  emptyWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  listWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 15,
+    paddingTop: 15
+  },
+  listItem: {
+    backgroundColor: "#4f9deb",
+    fontSize: 15,
+    padding: 15,
+    margin: 5
+  },
+  listWrapperTitle: {
+    fontSize: 18,
+    margin: 5,
+    fontWeight: "bold"
+  }
+};
+
 const mapStateToProps = state => {
-  console.log("mapStateToProps is called");
   return {
-    newOrder: state.newOrder
+    newOrder: { ...state.newOrder, menu: _.values(state.newOrder.menu) }
   };
 };
 

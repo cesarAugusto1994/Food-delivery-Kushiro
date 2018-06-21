@@ -17,6 +17,13 @@ import markers from "../constants/restaurants.json";
 
 const PANEL_HEIGHT = 250;
 
+const REGION = {
+  latitude: 42.975,
+  longitude: 144.37472,
+  latitudeDelta: 0.0922,
+  longitudeDelta: 0.0421
+};
+
 class MapScreen extends React.Component {
   static navigationOptions = {
     title: "Map"
@@ -34,12 +41,7 @@ class MapScreen extends React.Component {
       isPanelHidden: true,
       restaurant: "",
       // make constants REGION
-      region: {
-        latitude: 42.975,
-        longitude: 144.37472,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421
-      },
+      region: REGION,
       locationResult: null,
       location: null,
       hasLocationPermissions: false
@@ -93,7 +95,9 @@ class MapScreen extends React.Component {
     if (restaurant) {
       const {
         name,
-        contact: { formattedPhone },
+        contact: {
+          formattedPhone = "This restaurant does not have a phone number yet."
+        },
         location: { formattedAddress },
         menu
       } = restaurant;
@@ -107,13 +111,22 @@ class MapScreen extends React.Component {
             }
           ]}
         >
-          <Text>{name}</Text>
-          <Text>{formattedAddress.join(" ")}</Text>
-          <Text>{formattedPhone}</Text>
+          <Text
+            style={{ fontSize: 20, fontWeight: "bold" }}
+          >{`Name: ${name}`}</Text>
+          <Text style={{ fontSize: 15 }}>{`Address: ${formattedAddress.join(
+            " "
+          )}`}</Text>
+          <Text
+            style={{ fontSize: 15 }}
+          >{`Phone number: ${formattedPhone}`}</Text>
+          <Text />
           <FlatList
             data={menu}
             renderItem={({ item }) => (
-              <Text>{`${item.name}: ${item.price}￥`}</Text>
+              <Text style={{ fontSize: 15 }}>{`${item.name}: ${
+                item.price
+              }￥`}</Text>
             )}
             keyExtractor={this._keyExtractor}
           />
@@ -123,7 +136,7 @@ class MapScreen extends React.Component {
               if (this.props.newOrder.stripeToken) {
                 return Alert.alert(
                   "Not available",
-                  "You already have an order on its way. Please wait after it is finished."
+                  "You already have an order on the way. Please wait after it is finished."
                 );
               }
               this.props.navigation.navigate("OrderDetail", restaurant);
@@ -195,6 +208,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
+    alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#DDDDDD",
     padding: 10

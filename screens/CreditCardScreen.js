@@ -10,6 +10,7 @@ import { FormLabel, FormInput } from "react-native-elements";
 import { connect } from "react-redux";
 import { StackActions, NavigationActions } from "react-navigation";
 
+import SubmitButton from "../components/SubmitButton";
 import { saveCreditCard } from "../actions";
 
 class CreditCardScreen extends Component {
@@ -45,23 +46,11 @@ class CreditCardScreen extends Component {
       index: 0,
       actions: [NavigationActions.navigate({ routeName: "Account" })]
     });
-
-    return Alert.alert("Confirm", "Are you sure ?", [
-      {
-        text: "Yes",
-        onPress: () => {
-          this.props.saveCreditCard(this.state.card);
-          this.props.navigation.dispatch(resetAction);
-          this.props.navigation.navigate(
-            this.props.navigation.state.params.returnToScreen
-          );
-        }
-      },
-      {
-        text: "No",
-        onPress: () => false
-      }
-    ]);
+    this.props.saveCreditCard(this.state.card);
+    this.props.navigation.dispatch(resetAction);
+    this.props.navigation.navigate(
+      this.props.navigation.state.params.returnToScreen
+    );
   };
 
   render() {
@@ -87,9 +76,7 @@ class CreditCardScreen extends Component {
           onChangeText={text => this._setCardInfo(text, "cvc")}
         />
 
-        <TouchableOpacity onPress={() => this._submitCreditCardInfo()}>
-          <Text>Submit</Text>
-        </TouchableOpacity>
+        <SubmitButton onPress={this._submitCreditCardInfo} />
       </ScrollView>
     );
   }
