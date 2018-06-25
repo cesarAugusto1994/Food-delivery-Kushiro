@@ -9,6 +9,7 @@ import {
 import { FormLabel, FormInput } from "react-native-elements";
 import { connect } from "react-redux";
 import { StackActions, NavigationActions } from "react-navigation";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import SubmitButton from "../components/SubmitButton";
 import { saveCreditCard } from "../actions";
@@ -56,7 +57,7 @@ class CreditCardScreen extends Component {
   render() {
     // REFACTOR: add error handling/messages and regex check
     return (
-      <ScrollView>
+      <KeyboardAwareScrollView>
         <FormLabel>Name</FormLabel>
         <FormInput onChangeText={text => this._setCardInfo(text, "name")} />
 
@@ -77,7 +78,7 @@ class CreditCardScreen extends Component {
         />
 
         <SubmitButton onPress={this._submitCreditCardInfo} />
-      </ScrollView>
+      </KeyboardAwareScrollView>
     );
   }
 }

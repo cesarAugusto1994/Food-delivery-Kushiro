@@ -4,7 +4,6 @@ import { AsyncStorage } from "react-native";
 import thunk from "redux-thunk";
 
 import reducers from "../reducers";
-import { getTimeLeft } from "../helpers/timeLeftHelper";
 
 const persistConfig = {
   key: "root",

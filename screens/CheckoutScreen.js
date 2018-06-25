@@ -12,6 +12,7 @@ import {
 import { connect } from "react-redux";
 import { FormInput, PricingCard } from "react-native-elements";
 import { StackActions, NavigationActions } from "react-navigation";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import SubmitButton from "../components/SubmitButton";
 import { saveOrder } from "../actions";
@@ -144,7 +145,7 @@ class CheckoutScreen extends Component {
     }
 
     return (
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <KeyboardAwareScrollView contentContainerStyle={styles.contentContainer}>
         {this._showCreditCardInfo()}
         <Text style={styles.paragraph}>{`Total cost: ${totalCost}￥`}</Text>
         <Text style={styles.paragraph}>
@@ -158,7 +159,7 @@ class CheckoutScreen extends Component {
             <ActivityIndicator size="large" color="#4f9deb" />
           </View>
         </Modal>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     );
   }
 }
